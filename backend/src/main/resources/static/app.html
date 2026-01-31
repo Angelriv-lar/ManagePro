@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventory & Schedule Dashboard</title>
+
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="stylesheet" href="assets/mediaqueries.css" />
+
+  <style>
+    .tab-buttons { display:flex; gap:0.5rem; margin-top:1.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .tab-btn { padding:0.5rem 1rem; border-radius:999px; border:1px solid #3a4660; background:#111827; color:#e5e7eb; cursor:pointer; }
+    .tab-btn.active { background:#3b82f6; color:white; border-color:#3b82f6; }
+    .chip { display:inline-block; padding:0.2rem 0.6rem; border-radius:999px; background:#111827; border:1px solid #374151; color:#d1d5db; font-size:0.75rem; }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <nav id="desktop-nav">
+      <ul class="nav-links">
+        <li><a href="login.html">Log Out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1 class="title">Dashboard</h1>
+
+    <!-- TABS -->
+    <div class="tab-buttons">
+      <button id="tab-inventory" class="tab-btn active">Inventory</button>
+      <button id="tab-schedule" class="tab-btn">Staff Schedule</button>
+      <button id="cat-input" class="tab-btn">Location</button>
+    </div>
+
+    <!-- SEARCH BAR FOR INVENTORY -->
+    <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+      <input
+        id="inventory-search"
+        type="text"
+        placeholder="Search..."
+        style="
+          min-width:220px;
+          padding:0.45rem 0.75rem;
+          border-radius:999px;
+          border:1px solid #3a4660;
+          background:#020617;
+          color:#e5e7eb;
+        "
+      />
+    </div>
+    <!-- ================= INVENTORY PANEL ================= -->
+    <div id="inventory-panel">
+
+      <form id="add-product-form" style="margin-bottom:1.5rem;">
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+
+          <div>
+            <label>Category</label>
+            <select id="cat-input">
+              <option>Clothing</option>
+              <option>Electronics</option>
+              <option>Groceries</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Product</label>
+            <input id="name-input" type="text" required placeholder="Product">
+          </div>
+
+          <div>
+            <label>Qty</label>
+            <input id="qty-input" type="number" value="1" min="0">
+          </div>
+
+          <div>
+            <label>Price</label>
+            <input id="price-input" type="number" value="0.00" min="0" step="0.01">
+          </div>
+
+          <div>
+            <label>Status</label>
+            <select id="status-input">
+              <option>In Stock</option>
+              <option>Low Stock</option>
+              <option>Out of Stock</option>
+            </select>
+          </div>
+
+          <button class="btn btn-color-1">Add Product</button>
+        </div>
+      </form>
+
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>Category</th><th>Product</th><th>Qty</th><th>Price</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ================= STAFF SCHEDULE PANEL ================= -->
+    <div id="schedule-panel" style="display:none;">
+
+      <form id="schedule-form" style="margin-bottom:1.5rem;">
+        <div style="display:flex; flex-wrap:wrap; gap:0.75rem;">
+
+          <div>
+            <label>Name</label>
+            <input id="staff-name" type="text" placeholder="Alex Rivera" required>
+          </div>
+
+          <div>
+            <label>Role</label>
+            <input id="staff-role" type="text" placeholder="Cashier">
+          </div>
+
+          <div>
+            <label>Day</label>
+            <select id="staff-day">
+              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Availability</label>
+            <select id="staff-availability">
+              <option>Mornings</option><option>Afternoons</option><option>Evenings</option><option>Anytime</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Shift</label>
+            <input id="staff-shift" type="text" placeholder="9am – 1pm">
+          </div>
+
+          <button class="btn btn-color-1">Add Shift</button>
+        </div>
+      </form>
+
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>Name</th><th>Role</th><th>Day</th><th>Availability</th><th>Shift</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="schedule-body"></tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- ================= SIMPLE JAVASCRIPT THAT CAN’T FAIL ================= -->
+  <script>
+    // -------- TAB SWITCHING --------
+    document.getElementById("tab-inventory").onclick = () => {
+      document.getElementById("inventory-panel").style.display = "block";
+      document.getElementById("schedule-panel").style.display = "none";
+      event.target.classList.add("active");
+      document.getElementById("tab-schedule").classList.remove("active");
+    };
+
+    document.getElementById("tab-schedule").onclick = () => {
+      document.getElementById("inventory-panel").style.display = "none";
+      document.getElementById("schedule-panel").style.display = "block";
+      event.target.classList.add("active");
+      document.getElementById("tab-inventory").classList.remove("active");
+    };
+
+    // -------- INVENTORY ADD --------
+    document.getElementById("add-product-form").onsubmit = (e) => {
+      e.preventDefault();
+
+      const cat = document.getElementById("cat-input").value;
+      const name = document.getElementById("name-input").value;
+      const qty = document.getElementById("qty-input").value;
+      const price = Number(document.getElementById("price-input").value).toFixed(2);
+      const status = document.getElementById("status-input").value;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${cat}</td><td>${name}</td><td>${qty}</td>
+        <td>$${price}</td><td>${status}</td>
+        <td><button class="btn btn-color-2 delete-inv">Delete</button></td>
+      `;
+      document.getElementById("inventory-body").appendChild(row);
+    };
+
+    document.getElementById("inventory-body").onclick = (e) => {
+      if (e.target.classList.contains("delete-inv")) {
+        e.target.closest("tr").remove();
+      }
+    };
+
+    // -------- SCHEDULE ADD --------
+    document.getElementById("schedule-form").onsubmit = (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("staff-name").value;
+      const role = document.getElementById("staff-role").value || "Staff";
+      const day = document.getElementById("staff-day").value;
+      const avail = document.getElementById("staff-availability").value;
+      const shift = document.getElementById("staff-shift").value || "TBD";
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${name}</td><td>${role}</td><td>${day}</td>
+        <td><span class="chip">${avail}</span></td>
+        <td>${shift}</td>
+        <td><button class="btn btn-color-2 delete-shift">Remove</button></td>
+      `;
+      document.getElementById("schedule-body").appendChild(row);
+    };
+
+    document.getElementById("schedule-body").onclick = (e) => {
+      if (e.target.classList.contains("delete-shift")) {
+        e.target.closest("tr").remove();
+      }
+    };
+  </script>
+
+</body>
+</html>
